@@ -1,7 +1,7 @@
-# Resubmission run plan (single source of truth for every reported training run).
+# Run plan: the single source of truth for every reported training run.
 #
 # Run IDs follow the pipeline: A* = queue on Kaggle account A, B* = queue on account B,
-# C* = conditional extra seeds for close ablations (run only if needed, see docs/protocol.md).
+# C* = conditional extra seeds for close ablations, run only if needed.
 # Execute with tools/run_queue.py, e.g.
 #   python tools/run_queue.py --ids A1 A2 A3 --tin-root /kaggle/input/... --output runs
 #
@@ -103,55 +103,55 @@ est_hours:
 
 runs:
   # ---- Account A: decision gate + Tiny-ImageNet main table -----------------------------
-  - {id: A1, dataset: tin, model: allcluster_medium, seed: 42, answers: "gate; R1.3, R2.2"}
+  - {id: A1, dataset: tin, model: allcluster_medium, seed: 42, answers: "gate; clustering and local-operator ablation"}
   - {id: A2, dataset: tin, model: resnet18, seed: 42, answers: "table; KD teacher"}
-  - {id: A3, dataset: tin, model: shufflenet_v2, seed: 42, answers: "R1.1"}
+  - {id: A3, dataset: tin, model: shufflenet_v2, seed: 42, answers: "seed replication"}
   - {id: A4, dataset: tin, model: mobilenet_v2, seed: 42, answers: "table (1 seed)"}
   - {id: A5, dataset: tin, model: coc, seed: 42, answers: "table (1 seed)"}
-  - {id: A6, dataset: tin, model: hbcc_small, seed: 42, kd_teacher: A2, answers: "R2.4"}
-  - {id: A7, dataset: tin, model: hbcc_medium, seed: 42, kd_teacher: A2, answers: "R2.4"}
-  - {id: A8, dataset: tin, model: shufflenet_v2, seed: 42, kd_teacher: A2, answers: "R2.1 baseline KD"}
-  - {id: A9, dataset: tin, model: mobilenet_v2, seed: 42, kd_teacher: A2, answers: "R2.1 baseline KD"}
-  - {id: A10, dataset: tin, model: resnet18, seed: 43, answers: "R1.1; KD teacher"}
-  - {id: A11, dataset: tin, model: shufflenet_v2, seed: 43, answers: "R1.1"}
-  - {id: A12, dataset: tin, model: hbcc_small, seed: 43, answers: "R1.1"}
-  - {id: A13, dataset: tin, model: hbcc_medium, seed: 43, answers: "R1.1"}
+  - {id: A6, dataset: tin, model: hbcc_small, seed: 42, kd_teacher: A2, answers: "multi-seed KD comparison"}
+  - {id: A7, dataset: tin, model: hbcc_medium, seed: 42, kd_teacher: A2, answers: "multi-seed KD comparison"}
+  - {id: A8, dataset: tin, model: shufflenet_v2, seed: 42, kd_teacher: A2, answers: "baseline receives the same KD"}
+  - {id: A9, dataset: tin, model: mobilenet_v2, seed: 42, kd_teacher: A2, answers: "baseline receives the same KD"}
+  - {id: A10, dataset: tin, model: resnet18, seed: 43, answers: "seed replication; KD teacher"}
+  - {id: A11, dataset: tin, model: shufflenet_v2, seed: 43, answers: "seed replication"}
+  - {id: A12, dataset: tin, model: hbcc_small, seed: 43, answers: "seed replication"}
+  - {id: A13, dataset: tin, model: hbcc_medium, seed: 43, answers: "seed replication"}
   - {id: A14, dataset: tin, model: allcluster_medium, seed: 43, answers: "gate confirmation"}
-  - {id: A15, dataset: tin, model: hbcc_small, seed: 43, kd_teacher: A10, answers: "R2.4"}
-  - {id: A16, dataset: tin, model: hbcc_medium, seed: 43, kd_teacher: A10, answers: "R2.4"}
-  - {id: A17, dataset: tin, model: shufflenet_v2, seed: 43, kd_teacher: A10, answers: "R2.1, R2.4"}
-  - {id: A18, dataset: tin, model: resnet18, seed: 44, answers: "R1.1; KD teacher"}
-  - {id: A19, dataset: tin, model: shufflenet_v2, seed: 44, answers: "R1.1"}
-  - {id: A20, dataset: tin, model: hbcc_small, seed: 44, answers: "R1.1"}
-  - {id: A21, dataset: tin, model: hbcc_medium, seed: 44, answers: "R1.1"}
+  - {id: A15, dataset: tin, model: hbcc_small, seed: 43, kd_teacher: A10, answers: "multi-seed KD comparison"}
+  - {id: A16, dataset: tin, model: hbcc_medium, seed: 43, kd_teacher: A10, answers: "multi-seed KD comparison"}
+  - {id: A17, dataset: tin, model: shufflenet_v2, seed: 43, kd_teacher: A10, answers: "baseline KD; seed replication"}
+  - {id: A18, dataset: tin, model: resnet18, seed: 44, answers: "seed replication; KD teacher"}
+  - {id: A19, dataset: tin, model: shufflenet_v2, seed: 44, answers: "seed replication"}
+  - {id: A20, dataset: tin, model: hbcc_small, seed: 44, answers: "seed replication"}
+  - {id: A21, dataset: tin, model: hbcc_medium, seed: 44, answers: "seed replication"}
   - {id: A22, dataset: tin, model: allcluster_medium, seed: 44, answers: "gate confirmation"}
-  - {id: A23, dataset: tin, model: hbcc_small, seed: 44, kd_teacher: A18, answers: "R2.4"}
-  - {id: A24, dataset: tin, model: hbcc_medium, seed: 44, kd_teacher: A18, answers: "R2.4"}
-  - {id: A25, dataset: tin, model: shufflenet_v2, seed: 44, kd_teacher: A18, answers: "R2.1, R2.4"}
+  - {id: A23, dataset: tin, model: hbcc_small, seed: 44, kd_teacher: A18, answers: "multi-seed KD comparison"}
+  - {id: A24, dataset: tin, model: hbcc_medium, seed: 44, kd_teacher: A18, answers: "multi-seed KD comparison"}
+  - {id: A25, dataset: tin, model: shufflenet_v2, seed: 44, kd_teacher: A18, answers: "baseline KD; seed replication"}
 
   # ---- Account B: gate partner + ablations + CIFAR-10 table -----------------------------
   - {id: B1, dataset: tin, model: hbcc_medium, seed: 42, answers: "gate; table"}
-  - {id: B2, dataset: tin, model: hbcc_small, seed: 42, answers: "R2.1 (CE reported)"}
+  - {id: B2, dataset: tin, model: hbcc_small, seed: 42, answers: "cross-entropy reported for every model"}
   - {id: B3, dataset: tin, model: medium_s1_dwconv, seed: 42, answers: "LBP vs learned DW"}
-  - {id: B4, dataset: tin, model: medium_s1_conv3x3, seed: 42, answers: "R2.2 LBP vs learned 3x3"}
-  - {id: B5, dataset: tin, model: medium_noshuffle, seed: 42, answers: "R2.2 shuffle"}
-  - {id: B6, dataset: tin, model: medium_nofold, seed: 42, answers: "R1.3 fold"}
-  - {id: B7, dataset: tin, model: medium_s4_p2, seed: 42, answers: "R2.6 stage 4"}
+  - {id: B4, dataset: tin, model: medium_s1_conv3x3, seed: 42, answers: "LBP filters vs learned 3x3"}
+  - {id: B5, dataset: tin, model: medium_noshuffle, seed: 42, answers: "channel shuffle"}
+  - {id: B6, dataset: tin, model: medium_nofold, seed: 42, answers: "fold partitioning"}
+  - {id: B7, dataset: tin, model: medium_s4_p2, seed: 42, answers: "stage-4 cluster occupancy"}
   - {id: B8, dataset: tin, model: medium_r4, seed: 42, answers: "r sweep"}
   - {id: B9, dataset: tin, model: medium_r1, seed: 42, answers: "r sweep (degenerate)"}
-  - {id: B10, dataset: tin, model: medium_stem2, seed: 42, answers: "R1.3, R2.2 stem stride"}
+  - {id: B10, dataset: tin, model: medium_stem2, seed: 42, answers: "stem stride"}
   - {id: B11, dataset: cifar10, model: resnet18, seed: 42, answers: "replaces unlogged 96.48; KD teacher"}
   - {id: B12, dataset: cifar10, model: shufflenet_v2, seed: 42, answers: "equal budget (N2)"}
   - {id: B13, dataset: cifar10, model: mobilenet_v2, seed: 42, answers: "equal budget (N2)"}
   - {id: B14, dataset: cifar10, model: coc, seed: 42, answers: "equal budget (N2)"}
-  - {id: B15, dataset: cifar10, model: hbcc_small, seed: 42, answers: "R2.1 CE on CIFAR"}
-  - {id: B16, dataset: cifar10, model: hbcc_medium, seed: 42, answers: "R2.1 CE on CIFAR"}
+  - {id: B15, dataset: cifar10, model: hbcc_small, seed: 42, answers: "cross-entropy on CIFAR-10"}
+  - {id: B16, dataset: cifar10, model: hbcc_medium, seed: 42, answers: "cross-entropy on CIFAR-10"}
   - {id: B17, dataset: cifar10, model: allcluster_medium, seed: 42, answers: "ablation, 2nd dataset"}
   - {id: B18, dataset: cifar10, model: hbcc_small, seed: 42, kd_teacher: B11, answers: "replaces unlogged 94.93"}
   - {id: B19, dataset: cifar10, model: hbcc_medium, seed: 42, kd_teacher: B11, answers: "replaces unlogged 95.36"}
-  - {id: B20, dataset: cifar10, model: shufflenet_v2, seed: 42, kd_teacher: B11, answers: "R2.1 baseline KD"}
-  - {id: B21, dataset: cifar10, model: mobilenet_v2, seed: 42, kd_teacher: B11, answers: "R2.1 baseline KD"}
-  - {id: B22, dataset: tin, model: alllocal_medium, seed: 42, answers: "R1.3 clustering mechanism (no cluster branch)"}
+  - {id: B20, dataset: cifar10, model: shufflenet_v2, seed: 42, kd_teacher: B11, answers: "baseline receives the same KD"}
+  - {id: B21, dataset: cifar10, model: mobilenet_v2, seed: 42, kd_teacher: B11, answers: "baseline receives the same KD"}
+  - {id: B22, dataset: tin, model: alllocal_medium, seed: 42, answers: "clustering mechanism (no cluster branch)"}
   - {id: B23, dataset: tin, model: alllocal_macs_matched, seed: 42, answers: "all-local at matched MACs (removes the compute confound in B22)"}
 
   # ---- The proposed model: all-local at matched MACs, given KD and multiple seeds -------
@@ -206,7 +206,7 @@ runs:
   # Round 9: scaled+7x7 + KD reached 61.55 val vs ShuffleNetV2-x1.5 + KD 59.71 at matched
   # parameters (McNemar p = 2.6e-05), and beat the ResNet-18 teacher by 2.85 pp. But BOTH
   # sides of that comparison are n=1. These bring the proposed model to 3 seeds and the
-  # baseline to 2-3. Nothing else matters more for the paper.
+  # baseline to 2-3. This is the highest-priority block in the plan.
   - {id: B46, dataset: tin, model: alllocal_2_68m_dw7, seed: 43, kd_teacher: A10, answers: "PROPOSED model KD seed 43"}
   - {id: B47, dataset: tin, model: alllocal_2_68m_dw7, seed: 44, kd_teacher: A18, answers: "PROPOSED model KD seed 44"}
   - {id: B48, dataset: tin, model: shufflenet_v2_x1_5, seed: 43, kd_teacher: A10, answers: "headline baseline KD seed 43"}
@@ -220,24 +220,23 @@ runs:
   # (796.9 -> 316.9 MB), cutting graph latency b128 1.37x and raising throughput 1.43x, at
   # equal parameters (1,619,810 vs 1,621,490) and equal MACs. If that tie survives at 2.7M,
   # conv3x3 strictly dominates LBPConv and must become the proposed model: publishing the
-  # LBPConv variant while our own ablation shows a cheaper equal-accuracy alternative is the
-  # single most obvious reviewer objection available.
+  # LBPConv variant while the ablation shows a cheaper equal-accuracy alternative would be
+  # hard to defend.
   # B52 is a GATE: if its val is within 0.3 pp of B38 (61.55), switch the headline to conv3x3
   # and run B53-B55. If it drops more than 0.5 pp, keep B38 and report conv3x3 as the
   # memory-efficient variant with the accuracy cost stated.
   - {id: B52, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 42, kd_teacher: A2, answers: "GATE: does the conv3x3/LBPConv tie survive at 2.7M?"}
-  - {id: B53, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 43, kd_teacher: A10, answers: "conv3x3 KD seed 43 (B52 gate PASSED; done in R11: 60.75)"}
+  - {id: B53, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 43, kd_teacher: A10, answers: "conv3x3 KD seed 43 (gate passed; 60.75)"}
   - {id: B54, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 44, kd_teacher: A18, answers: "conv3x3 KD seed 44 - DECIDES the stage-1 operator"}
   - {id: B55, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 42, answers: "conv3x3 CE seed 42 (conv3x3 has NO TIN CE run at all)"}
 
   # ---- CIFAR-10 for the headline pair (closes a selective-reporting gap) --------------
   # The master table covers nine models on CIFAR-10 but NONE of ShuffleNetV2-x1.5, the
-  # scaled models, or conv3x3. Publishing a CIFAR-10 table that omits the proposed model is
-  # the same objection R2 raised about favourable comparisons, so either these run or the
-  # CIFAR-10 table comes out of the paper.
+  # scaled models, or conv3x3. A CIFAR-10 table that omits the proposed model would be
+  # selective, so either these run or the CIFAR-10 table is dropped entirely.
   # NOTE: CIFAR-10 is saturated here (ResNet-18 = 96.76, above every student we have), so
   # this will NOT reproduce the beat-the-teacher result. The claim it supports is the
-  # parameter-matched one: proposed vs ShuffleNetV2-x1.5 at ~2.68M. Frame it that way.
+  # parameter-matched one: proposed vs ShuffleNetV2-x1.5 at ~2.68M.
   # Teacher is B11 (cifar10_resnet18_ce_s42), trained on account B.
   # B56/B57 are needed whichever architecture wins B52. B60/B61 apply only if B52 passes,
   # so run B58/B59 vs B60/B61 AFTER B52 reports - not both.
@@ -256,8 +255,8 @@ runs:
   # (-0.09 on s42, -0.36 on s43). It is no longer the strict domination the 1.62M pair
   # suggested: it costs ~0.2 pp for a 2.5x cut in batch-128 activation memory. B54 decides
   # whether that holds at n=3.
-  # conv3x3 has NO Tiny-ImageNet CE run at all (n=0), and R2.1 demanded CE on all datasets,
-  # so B55/B62/B63 are required if conv3x3 is the proposed model.
+  # conv3x3 has NO Tiny-ImageNet CE run at all (n=0), and cross-entropy must be reported
+  # on every dataset, so B55/B62/B63 are required if conv3x3 is the proposed model.
   - {id: B62, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 43, answers: "conv3x3 CE seed 43"}
   - {id: B63, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 44, answers: "conv3x3 CE seed 44"}
 
@@ -277,21 +276,21 @@ runs:
   - {id: B67, dataset: cifar10, model: alllocal_2_68m_conv3x3_dw7, seed: 44, kd_teacher: B69, conditional: true, answers: "CIFAR-10 proposed KD seed 44"}
 
   # ---- Conditional (T8): extra seeds ONLY for ablations within 1.0 pp (val) of B1 --------
-  - {id: C1, dataset: tin, model: medium_s1_dwconv, seed: 43, conditional: true, answers: "T8"}
-  - {id: C2, dataset: tin, model: medium_s1_dwconv, seed: 44, conditional: true, answers: "T8"}
-  - {id: C3, dataset: tin, model: medium_s1_conv3x3, seed: 43, conditional: true, answers: "T8"}
-  - {id: C4, dataset: tin, model: medium_s1_conv3x3, seed: 44, conditional: true, answers: "T8"}
-  - {id: C5, dataset: tin, model: medium_noshuffle, seed: 43, conditional: true, answers: "T8"}
-  - {id: C6, dataset: tin, model: medium_noshuffle, seed: 44, conditional: true, answers: "T8"}
-  - {id: C7, dataset: tin, model: medium_nofold, seed: 43, conditional: true, answers: "T8"}
-  - {id: C8, dataset: tin, model: medium_nofold, seed: 44, conditional: true, answers: "T8"}
-  - {id: C9, dataset: tin, model: medium_s4_p2, seed: 43, conditional: true, answers: "T8"}
-  - {id: C10, dataset: tin, model: medium_s4_p2, seed: 44, conditional: true, answers: "T8"}
-  - {id: C11, dataset: tin, model: medium_r4, seed: 43, conditional: true, answers: "T8"}
-  - {id: C12, dataset: tin, model: medium_r4, seed: 44, conditional: true, answers: "T8"}
-  - {id: C13, dataset: tin, model: medium_r1, seed: 43, conditional: true, answers: "T8"}
-  - {id: C14, dataset: tin, model: medium_r1, seed: 44, conditional: true, answers: "T8"}
-  - {id: C15, dataset: tin, model: medium_stem2, seed: 43, conditional: true, answers: "T8"}
-  - {id: C16, dataset: tin, model: medium_stem2, seed: 44, conditional: true, answers: "T8"}
-  - {id: C17, dataset: tin, model: alllocal_medium, seed: 43, conditional: true, answers: "T8"}
-  - {id: C18, dataset: tin, model: alllocal_medium, seed: 44, conditional: true, answers: "T8"}
+  - {id: C1, dataset: tin, model: medium_s1_dwconv, seed: 43, conditional: true, answers: "conditional extra seed"}
+  - {id: C2, dataset: tin, model: medium_s1_dwconv, seed: 44, conditional: true, answers: "conditional extra seed"}
+  - {id: C3, dataset: tin, model: medium_s1_conv3x3, seed: 43, conditional: true, answers: "conditional extra seed"}
+  - {id: C4, dataset: tin, model: medium_s1_conv3x3, seed: 44, conditional: true, answers: "conditional extra seed"}
+  - {id: C5, dataset: tin, model: medium_noshuffle, seed: 43, conditional: true, answers: "conditional extra seed"}
+  - {id: C6, dataset: tin, model: medium_noshuffle, seed: 44, conditional: true, answers: "conditional extra seed"}
+  - {id: C7, dataset: tin, model: medium_nofold, seed: 43, conditional: true, answers: "conditional extra seed"}
+  - {id: C8, dataset: tin, model: medium_nofold, seed: 44, conditional: true, answers: "conditional extra seed"}
+  - {id: C9, dataset: tin, model: medium_s4_p2, seed: 43, conditional: true, answers: "conditional extra seed"}
+  - {id: C10, dataset: tin, model: medium_s4_p2, seed: 44, conditional: true, answers: "conditional extra seed"}
+  - {id: C11, dataset: tin, model: medium_r4, seed: 43, conditional: true, answers: "conditional extra seed"}
+  - {id: C12, dataset: tin, model: medium_r4, seed: 44, conditional: true, answers: "conditional extra seed"}
+  - {id: C13, dataset: tin, model: medium_r1, seed: 43, conditional: true, answers: "conditional extra seed"}
+  - {id: C14, dataset: tin, model: medium_r1, seed: 44, conditional: true, answers: "conditional extra seed"}
+  - {id: C15, dataset: tin, model: medium_stem2, seed: 43, conditional: true, answers: "conditional extra seed"}
+  - {id: C16, dataset: tin, model: medium_stem2, seed: 44, conditional: true, answers: "conditional extra seed"}
+  - {id: C17, dataset: tin, model: alllocal_medium, seed: 43, conditional: true, answers: "conditional extra seed"}
+  - {id: C18, dataset: tin, model: alllocal_medium, seed: 44, conditional: true, answers: "conditional extra seed"}

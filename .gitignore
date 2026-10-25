@@ -39,10 +39,9 @@ results/benchmark*/
 *_profile.txt
 
 # ---- Paper sources and third-party material ------------------------------
-# The manuscript, IEEEtran.cls and the conference template are not part of
-# this release and are not ours to redistribute.
-submission/
-fjcai_template_extract/
+# Manuscript sources and any third-party document class are not part of this
+# release and are not ours to redistribute.
+manuscript/
 Report_LaTeX/
 docs/
 *.pdf

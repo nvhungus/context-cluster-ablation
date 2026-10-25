@@ -6,10 +6,10 @@ experiment name without the ``_s{seed}`` suffix.
 
 Examples
 --------
-    python tools/aggregate_seeds.py runs_a runs_b --output results/resubmission/summary.csv
+    python tools/aggregate_seeds.py runs_a runs_b --output results/summary/summary.csv
     python tools/aggregate_seeds.py runs_a runs_b \
         --compare tin_hbcc_medium_ce:tin_allcluster_medium_ce \
-        --compare tin_hbcc_medium_kd:tin_resnet18_ce --latex results/resubmission/table.tex
+        --compare tin_hbcc_medium_kd:tin_resnet18_ce --latex results/summary/table.tex
 
 Paired comparisons use the seeds both groups share: mean/std of the per-seed difference, a paired
 t-test across seeds (n >= 2), and an exact McNemar test per seed on the shared test images.
@@ -197,7 +197,7 @@ def write_latex(rows: list[dict], path: Path) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Aggregate runs across seeds and run paired comparisons.")
     parser.add_argument("roots", nargs="+", help="Directories containing run directories (searched recursively).")
-    parser.add_argument("--output", default="results/resubmission/summary.csv")
+    parser.add_argument("--output", default="results/summary/summary.csv")
     parser.add_argument("--compare", action="append", default=[], help="GROUP_A:GROUP_B (A minus B).")
     parser.add_argument("--metric", default="test_acc1", choices=["test_acc1", "best_val_acc1", "test_acc5"])
     parser.add_argument("--latex")

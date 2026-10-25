@@ -1,14 +1,13 @@
-# Do Context Clusters Help Lightweight Image Classification?
+# Context-cluster ablation study
 
-Code, configurations and per-run records for the paper *"Do Context Clusters Help
-Lightweight Image Classification? An Ablation Study and a Stronger All-Local
-Baseline"* (FJCAI 2027).
+Code, configurations and per-run records for a controlled ablation study on
+context clustering in lightweight image classification.
 
 ## What this is
 
 Context Cluster replaces attention with a clustering token mixer and reports
 competitive accuracy at 5.3M parameters on 224×224 inputs. This repository
-contains the experiments that test whether the mechanism survives compression to
+contains experiments that test whether the mechanism survives compression to
 one to three million parameters at 32×32 input.
 
 It does not. Holding the stem, fold partitioning, block depth and width fixed and
@@ -24,9 +23,9 @@ distillation it reaches **61.21 ± 0.40** top-1 on Tiny-ImageNet against
 **59.72 ± 0.14** for a parameter-matched ShuffleNetV2-x1.5 trained identically
 from the same teacher, and **58.76 ± 0.06** for the ResNet-18 teacher itself.
 
-Two caveats carried from the paper: the margin holds **under distillation** (with
-plain cross-entropy it falls to 0.47 pp and is not significant), and it costs
-2.41× the operations of the parameter-matched baseline.
+Two caveats belong with that number: the margin holds **under distillation**
+(with plain cross-entropy it falls to 0.47 pp and is not significant), and it
+costs 2.41× the operations of the parameter-matched baseline.
 
 ## Environment
 
@@ -38,13 +37,13 @@ pip install -r requirements.txt
 ```
 
 Requires PyTorch with CUDA for training; `fvcore` is needed for operation counts
-in `tools/benchmark.py`. All results in the paper were produced on a single
+in `tools/benchmark.py`. All results here were produced on a single
 NVIDIA Tesla T4.
 
 Datasets are not redistributed here. CIFAR-10 downloads automatically on first
 use. Tiny-ImageNet must be supplied; pass its root with `--tin-root`.
 
-## Reproducing the paper
+## Reproducing the results
 
 Every reported run is declared in [`configs/run_plan.yaml`](configs/run_plan.yaml),
 which is the single source of truth for the experiments: run ID, dataset, model
@@ -106,7 +105,7 @@ python paper/figures/fig2_pareto.py         # accuracy vs parameters and MACs
 ```
 
 Both write a PDF next to the script. They need only `matplotlib`; the cost
-figures are hard-coded from the benchmark session reported in the paper.
+figures are hard-coded from the benchmark session reported in `results/`.
 
 ## What is in `release/runs/`
 
@@ -123,7 +122,7 @@ included. Each directory contains:
 | `test_predictions.npy` | predicted class index for every test image, in dataset order |
 | `test_targets.npy` | ground-truth class index for every test image |
 
-Per-image predictions are included so that any comparison in the paper can be
+Per-image predictions are included so that any comparison reported here can be
 recomputed, including the paired tests, which need the pairing that aggregate
 accuracies discard.
 
@@ -159,9 +158,8 @@ official 10,000-image validation split is used as the **test** set, and a furthe
 10,000 images held out of the training split (fixed seed) serve as the validation
 set for epoch selection. No model selects an epoch using the reported test set.
 
-Some `release/runs/` directories predate the paper and are not cited in it; the
-set of runs the paper reports is exactly the one declared in
-`configs/run_plan.yaml`.
+Some `release/runs/` directories predate the current study; the set of runs the
+reported results draw on is exactly the one declared in `configs/run_plan.yaml`.
 
 ## Layout
 
@@ -169,26 +167,14 @@ set of runs the paper reports is exactly the one declared in
 lightweight_hbcc/     model, data, training engine, losses, profiler
   models/             the hybrid block, local branches, baselines
 configs/              model configs; run_plan.yaml declares every reported run
-  ablations/          one-change ablations used in the paper
+  ablations/          one-change ablations used in the study
   baselines/          ResNet-18, MobileNetV2, ShuffleNetV2 x1.0 and x1.5
 tools/                train.py, run_queue.py, benchmark.py, aggregate_seeds.py
 tests/                unit tests for losses, profiler, run queue, models
 notebooks/            the Kaggle session notebooks used to execute the runs
 results/              aggregated CSV tables
 release/runs/         per-run metrics, provenance and per-image predictions
-paper/figures/        scripts that regenerate the paper's figures
-```
-
-## Citation
-
-```bibtex
-@inproceedings{nguyen2027contextcluster,
-  title     = {Do Context Clusters Help Lightweight Image Classification?
-               An Ablation Study and a Stronger All-Local Baseline},
-  author    = {Nguyen, Viet Hung and Nguyen, Ba Nam and Le, Hoang Thai},
-  booktitle = {Vietnamese National Symposium on Artificial Intelligence (FJCAI)},
-  year      = {2027}
-}
+paper/figures/        figure-generation scripts
 ```
 
 ## License
