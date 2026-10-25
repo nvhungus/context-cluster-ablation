@@ -1,0 +1,79 @@
+# ---- Python ------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# ---- Datasets and training output ---------------------------------------
+# Datasets are downloaded at run time; runs/ is written by tools/train.py.
+data/
+runs/
+runs_*/
+checkpoints/
+artifacts/
+external/
+*.pth
+*.pt
+*.onnx
+*.ckpt
+
+# ---- Downloaded Kaggle session archives ----------------------------------
+# The extracted per-run records are committed under release/runs/; the
+# downloaded .zip bundles are redundant and large.
+kaggle/
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# ---- Regenerated benchmark output ----------------------------------------
+results/benchmark*/
+*_profile.txt
+
+# ---- Paper sources and third-party material ------------------------------
+# The manuscript, IEEEtran.cls and the conference template are not part of
+# this release and are not ours to redistribute.
+submission/
+fjcai_template_extract/
+Report_LaTeX/
+docs/
+*.pdf
+*.cls
+*.docx
+
+# LaTeX build artifacts, in case anyone builds a document here
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# ---- Figures are build products ------------------------------------------
+# Regenerate with: python paper/figures/fig1_architecture.py
+paper/figures/*.pdf
+paper/figures/*.png
+
+# ---- Vendored third-party code -------------------------------------------
+# The Food-101 pipeline is a copy of another author's repository and is not
+# used by this paper.
+food101/
+
+# ---- OS / editor ----------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp

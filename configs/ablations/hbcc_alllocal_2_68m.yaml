@@ -1,0 +1,61 @@
+# All-local scaled to ShuffleNetV2-x1.5's parameter budget (~2.68M), for a like-for-like
+# parameter-matched comparison. Widths [60,90,180,240] -> [78,116,232,310] (k = 1.291, from
+# 0.97k^2 + 0.03k = 1.6551). Expected ~2.68M params and ~230M MACs; note this is ~2.4x the
+# MACs of ShuffleNetV2-x1.5 (96.1M), so the comparison is parameter-matched, not compute-matched.
+#
+# VERIFY BEFORE RUNNING (CPU):
+#   cfg = load_config(<this file>); cfg["model"]["num_classes"] = 200
+#   print(model_static_metrics(build_model(cfg), torch.device("cpu")))
+#   target params ~= 2,683,624 (within ~2.60-2.76M is fine); adjust embed_dims otherwise.
+experiment:
+  name: hbcc_alllocal_2_68m
+data:
+  name: cifar10
+  root: data
+  download: true
+  batch_size: 128
+  val_batch_size: 256
+  test_batch_size: 256
+  val_size: 5000
+  split_seed: 42
+  workers: 2
+  augment: true
+  randaugment:
+    enabled: true
+    num_ops: 2
+    magnitude: 9
+  random_erasing:
+    p: 0.25
+    scale: [0.02, 0.2]
+    ratio: [0.3, 3.3]
+model:
+  name: hbcc
+  num_classes: 10
+  use_coord: true
+  embed_dims: [78, 116, 232, 310]
+  depths: [1, 1, 2, 1]
+  mlp_ratios: 3.0
+  heads: [2, 3, 4, 4]
+  head_dim: [16, 16, 16, 16]
+  proposals: [[2, 2], [2, 2], [2, 2], [1, 1]]
+  folds: [[4, 4], [2, 2], [1, 1], [1, 1]]
+  similarities: [cosine, cosine, cosine, cosine]
+  stage_modes: [local, local, local, local]
+  local_branches: [lbpconv, dwconv, dwconv, dwconv]
+  local_ratios: [1.0, 1.0, 1.0, 1.0]
+  channel_shuffle: [false, false, false, false]
+  norm: bn
+  stem_stride: 1
+  drop_path_rate: 0.08
+train:
+  epochs: 300
+  warmup_epochs: 5
+  lr: 0.001
+  weight_decay: 0.05
+  label_smoothing: 0.1
+  mixup_alpha: 0.2
+  cutmix_alpha: 1.0
+  cutmix_prob: 0.5
+  amp: true
+  kd_alpha: 0.0
+  kd_temperature: 4.0

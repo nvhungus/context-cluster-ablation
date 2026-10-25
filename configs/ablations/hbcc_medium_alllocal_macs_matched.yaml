@@ -1,0 +1,69 @@
+# MACs-matched counterpart of hbcc_medium_alllocal.yaml.
+#
+# The parameter-matched all-local ablation (1.84M params / 157.7M MACs) beats HBCC-Medium
+# (1.80M / 139.3M) by +1.23 pp, but it also spends ~13% more MACs, so compute is a confound.
+# This variant narrows the stages by ~6% (width^2 scaling) to bring MACs back to ~139M, the
+# hybrid's budget, so the local-vs-cluster comparison can also be made at matched compute.
+#
+# VERIFY MACs BEFORE RUNNING (CPU is enough):
+#   from lightweight_hbcc.config import load_config
+#   from lightweight_hbcc.models import build_model
+#   from lightweight_hbcc.profiler import model_static_metrics
+#   import torch
+#   cfg = load_config("configs/ablations/hbcc_medium_alllocal_macs_matched.yaml")
+#   cfg["model"]["num_classes"] = 200
+#   m = build_model(cfg)
+#   print(model_static_metrics(m, torch.device("cpu")))   # target macs_incl_cluster ~= 139.3e6
+# Adjust embed_dims if it lands outside roughly 135-144M.
+experiment:
+  name: hbcc_medium_alllocal_macs_matched
+data:
+  name: cifar10
+  root: data
+  download: true
+  batch_size: 128
+  val_batch_size: 256
+  test_batch_size: 256
+  val_size: 5000
+  split_seed: 42
+  workers: 2
+  augment: true
+  randaugment:
+    enabled: true
+    num_ops: 2
+    magnitude: 9
+  random_erasing:
+    p: 0.25
+    scale: [0.02, 0.2]
+    ratio: [0.3, 3.3]
+model:
+  name: hbcc
+  num_classes: 10
+  use_coord: true
+  embed_dims: [60, 90, 180, 240]
+  depths: [1, 1, 2, 1]
+  mlp_ratios: 3.0
+  heads: [2, 3, 4, 4]
+  head_dim: [16, 16, 16, 16]
+  proposals: [[2, 2], [2, 2], [2, 2], [1, 1]]
+  folds: [[4, 4], [2, 2], [1, 1], [1, 1]]
+  similarities: [cosine, cosine, cosine, cosine]
+  stage_modes: [local, local, local, local]
+  local_branches: [lbpconv, dwconv, dwconv, dwconv]
+  local_ratios: [1.0, 1.0, 1.0, 1.0]
+  channel_shuffle: [false, false, false, false]
+  norm: bn
+  stem_stride: 1
+  drop_path_rate: 0.08
+train:
+  epochs: 300
+  warmup_epochs: 5
+  lr: 0.001
+  weight_decay: 0.05
+  label_smoothing: 0.1
+  mixup_alpha: 0.2
+  cutmix_alpha: 1.0
+  cutmix_prob: 0.5
+  amp: true
+  kd_alpha: 0.0
+  kd_temperature: 4.0

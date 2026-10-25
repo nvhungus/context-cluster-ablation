@@ -1,0 +1,5 @@
+experiment,best_val_acc1,best_val_acc5,test_acc1,test_acc5
+resnet18_tin,58.66,80.3,58.58,80.4
+mobilenet_v2_tin,49.12,75.09,49.97,75.35
+shufflenet_v2_x1_0_tin,55.23,78.7,55.68,79.32
+coc_baseline_tin,49.38,74.13,49.3,73.89

@@ -1,0 +1,297 @@
+# Resubmission run plan (single source of truth for every reported training run).
+#
+# Run IDs follow the pipeline: A* = queue on Kaggle account A, B* = queue on account B,
+# C* = conditional extra seeds for close ablations (run only if needed, see docs/protocol.md).
+# Execute with tools/run_queue.py, e.g.
+#   python tools/run_queue.py --ids A1 A2 A3 --tin-root /kaggle/input/... --output runs
+#
+# Experiment directory name = {dataset}_{model}_{ce|kd}_s{seed}.
+# KD students always use the ResNet-18 teacher trained with the SAME dataset and seed.
+
+datasets:
+  tin:
+    epochs: 100
+    overrides:
+      - data.name=tiny_imagenet
+      - data.root={tin_root}
+      - model.num_classes=200
+      - data.val_size=10000
+  cifar10:
+    epochs: 250
+    overrides:
+      - data.name=cifar10
+      - data.root={cifar_root}
+      - model.num_classes=10
+
+kd:
+  teacher_config: configs/baselines/resnet18_cifar.yaml
+  # Measured over 5 Tiny-ImageNet KD runs: the frozen-teacher forward pass costs ~15%, not 5%.
+  overhead: 1.15
+  overrides:
+    - train.kd_alpha=0.5
+    - train.kd_temperature=4.0
+
+models:
+  resnet18: configs/baselines/resnet18_cifar.yaml
+  mobilenet_v2: configs/baselines/mobilenet_v2_cifar.yaml
+  shufflenet_v2: configs/baselines/shufflenet_v2_x1_0_cifar.yaml
+  coc: configs/coc_cifar_baseline.yaml
+  hbcc_small: configs/hbcc_accuracy_small.yaml
+  hbcc_medium: configs/hbcc_accuracy_medium.yaml
+  allcluster_medium: configs/ablations/hbcc_accuracy_medium_allcluster.yaml
+  medium_s1_dwconv: configs/ablations/hbcc_medium_s1_dwconv.yaml
+  medium_s1_conv3x3: configs/ablations/hbcc_medium_s1_conv3x3.yaml
+  medium_noshuffle: configs/ablations/hbcc_medium_noshuffle.yaml
+  medium_nofold: configs/ablations/hbcc_medium_nofold.yaml
+  medium_s4_p2: configs/ablations/hbcc_medium_s4_p2.yaml
+  medium_r4: configs/ablations/hbcc_medium_r4.yaml
+  medium_r1: configs/ablations/hbcc_medium_r1.yaml
+  medium_stem2: configs/ablations/hbcc_medium_stem2.yaml
+  alllocal_medium: configs/ablations/hbcc_medium_alllocal.yaml
+  alllocal_macs_matched: configs/ablations/hbcc_medium_alllocal_macs_matched.yaml
+  alllocal_conv3x3: configs/ablations/hbcc_medium_alllocal_conv3x3.yaml
+  alllocal_dkd: configs/ablations/hbcc_medium_alllocal_dkd.yaml
+  alllocal_2_68m: configs/ablations/hbcc_alllocal_2_68m.yaml
+  alllocal_2_68m_dw7: configs/ablations/hbcc_alllocal_2_68m_dw7.yaml
+  alllocal_2_68m_conv3x3_dw7: configs/ablations/hbcc_alllocal_2_68m_conv3x3_dw7.yaml
+  shufflenet_v2_x1_5: configs/baselines/shufflenet_v2_x1_5_cifar.yaml
+
+# Estimated T4 hours per CE run, used by run_queue --deadline-hours. KD runs add ~5%.
+# Tiny-ImageNet: measured in sessions A_s1/B_s1 (4 data workers). Runs are CPU-bound (JPEG decode +
+# RandAugment), so every model takes ~1.8-2.3 h; untested ablations use the HBCC-Medium time.
+# CIFAR-10: not measured yet; conservative (CPU-bound floor ~2.5 h at 250 epochs) until the first session.
+est_hours:
+  tin:
+    resnet18: 2.3
+    mobilenet_v2: 2.3
+    shufflenet_v2: 2.1
+    coc: 2.3
+    hbcc_small: 2.5
+    hbcc_medium: 2.6
+    allcluster_medium: 2.4
+    medium_s1_dwconv: 2.4
+    medium_s1_conv3x3: 2.4
+    medium_noshuffle: 2.4
+    medium_nofold: 2.4
+    medium_s4_p2: 2.4
+    medium_r4: 2.4
+    medium_r1: 2.4
+    medium_stem2: 2.1
+    alllocal_medium: 2.4
+    alllocal_macs_matched: 2.3
+    alllocal_conv3x3: 2.3
+    alllocal_dkd: 2.3
+    alllocal_2_68m: 2.8
+    alllocal_2_68m_dw7: 2.9
+    alllocal_2_68m_conv3x3_dw7: 2.8
+    shufflenet_v2_x1_5: 2.5
+  # CIFAR-10 measured in B_s3: much cheaper per image than Tiny-ImageNet (in-memory 32x32 arrays
+  # vs JPEG decode), so 250 epochs costs less than Tiny-ImageNet's 100. HBCC entries are scaled
+  # from the measured CNN runs and are still provisional.
+  cifar10:
+    resnet18: 1.4
+    mobilenet_v2: 1.5
+    shufflenet_v2: 1.6
+    coc: 2.1
+    hbcc_small: 2.5
+    hbcc_medium: 2.8
+    allcluster_medium: 2.5
+    alllocal_macs_matched: 2.2
+    shufflenet_v2_x1_5: 1.8
+    alllocal_2_68m_dw7: 2.8
+    alllocal_2_68m_conv3x3_dw7: 2.7
+
+runs:
+  # ---- Account A: decision gate + Tiny-ImageNet main table -----------------------------
+  - {id: A1, dataset: tin, model: allcluster_medium, seed: 42, answers: "gate; R1.3, R2.2"}
+  - {id: A2, dataset: tin, model: resnet18, seed: 42, answers: "table; KD teacher"}
+  - {id: A3, dataset: tin, model: shufflenet_v2, seed: 42, answers: "R1.1"}
+  - {id: A4, dataset: tin, model: mobilenet_v2, seed: 42, answers: "table (1 seed)"}
+  - {id: A5, dataset: tin, model: coc, seed: 42, answers: "table (1 seed)"}
+  - {id: A6, dataset: tin, model: hbcc_small, seed: 42, kd_teacher: A2, answers: "R2.4"}
+  - {id: A7, dataset: tin, model: hbcc_medium, seed: 42, kd_teacher: A2, answers: "R2.4"}
+  - {id: A8, dataset: tin, model: shufflenet_v2, seed: 42, kd_teacher: A2, answers: "R2.1 baseline KD"}
+  - {id: A9, dataset: tin, model: mobilenet_v2, seed: 42, kd_teacher: A2, answers: "R2.1 baseline KD"}
+  - {id: A10, dataset: tin, model: resnet18, seed: 43, answers: "R1.1; KD teacher"}
+  - {id: A11, dataset: tin, model: shufflenet_v2, seed: 43, answers: "R1.1"}
+  - {id: A12, dataset: tin, model: hbcc_small, seed: 43, answers: "R1.1"}
+  - {id: A13, dataset: tin, model: hbcc_medium, seed: 43, answers: "R1.1"}
+  - {id: A14, dataset: tin, model: allcluster_medium, seed: 43, answers: "gate confirmation"}
+  - {id: A15, dataset: tin, model: hbcc_small, seed: 43, kd_teacher: A10, answers: "R2.4"}
+  - {id: A16, dataset: tin, model: hbcc_medium, seed: 43, kd_teacher: A10, answers: "R2.4"}
+  - {id: A17, dataset: tin, model: shufflenet_v2, seed: 43, kd_teacher: A10, answers: "R2.1, R2.4"}
+  - {id: A18, dataset: tin, model: resnet18, seed: 44, answers: "R1.1; KD teacher"}
+  - {id: A19, dataset: tin, model: shufflenet_v2, seed: 44, answers: "R1.1"}
+  - {id: A20, dataset: tin, model: hbcc_small, seed: 44, answers: "R1.1"}
+  - {id: A21, dataset: tin, model: hbcc_medium, seed: 44, answers: "R1.1"}
+  - {id: A22, dataset: tin, model: allcluster_medium, seed: 44, answers: "gate confirmation"}
+  - {id: A23, dataset: tin, model: hbcc_small, seed: 44, kd_teacher: A18, answers: "R2.4"}
+  - {id: A24, dataset: tin, model: hbcc_medium, seed: 44, kd_teacher: A18, answers: "R2.4"}
+  - {id: A25, dataset: tin, model: shufflenet_v2, seed: 44, kd_teacher: A18, answers: "R2.1, R2.4"}
+
+  # ---- Account B: gate partner + ablations + CIFAR-10 table -----------------------------
+  - {id: B1, dataset: tin, model: hbcc_medium, seed: 42, answers: "gate; table"}
+  - {id: B2, dataset: tin, model: hbcc_small, seed: 42, answers: "R2.1 (CE reported)"}
+  - {id: B3, dataset: tin, model: medium_s1_dwconv, seed: 42, answers: "LBP vs learned DW"}
+  - {id: B4, dataset: tin, model: medium_s1_conv3x3, seed: 42, answers: "R2.2 LBP vs learned 3x3"}
+  - {id: B5, dataset: tin, model: medium_noshuffle, seed: 42, answers: "R2.2 shuffle"}
+  - {id: B6, dataset: tin, model: medium_nofold, seed: 42, answers: "R1.3 fold"}
+  - {id: B7, dataset: tin, model: medium_s4_p2, seed: 42, answers: "R2.6 stage 4"}
+  - {id: B8, dataset: tin, model: medium_r4, seed: 42, answers: "r sweep"}
+  - {id: B9, dataset: tin, model: medium_r1, seed: 42, answers: "r sweep (degenerate)"}
+  - {id: B10, dataset: tin, model: medium_stem2, seed: 42, answers: "R1.3, R2.2 stem stride"}
+  - {id: B11, dataset: cifar10, model: resnet18, seed: 42, answers: "replaces unlogged 96.48; KD teacher"}
+  - {id: B12, dataset: cifar10, model: shufflenet_v2, seed: 42, answers: "equal budget (N2)"}
+  - {id: B13, dataset: cifar10, model: mobilenet_v2, seed: 42, answers: "equal budget (N2)"}
+  - {id: B14, dataset: cifar10, model: coc, seed: 42, answers: "equal budget (N2)"}
+  - {id: B15, dataset: cifar10, model: hbcc_small, seed: 42, answers: "R2.1 CE on CIFAR"}
+  - {id: B16, dataset: cifar10, model: hbcc_medium, seed: 42, answers: "R2.1 CE on CIFAR"}
+  - {id: B17, dataset: cifar10, model: allcluster_medium, seed: 42, answers: "ablation, 2nd dataset"}
+  - {id: B18, dataset: cifar10, model: hbcc_small, seed: 42, kd_teacher: B11, answers: "replaces unlogged 94.93"}
+  - {id: B19, dataset: cifar10, model: hbcc_medium, seed: 42, kd_teacher: B11, answers: "replaces unlogged 95.36"}
+  - {id: B20, dataset: cifar10, model: shufflenet_v2, seed: 42, kd_teacher: B11, answers: "R2.1 baseline KD"}
+  - {id: B21, dataset: cifar10, model: mobilenet_v2, seed: 42, kd_teacher: B11, answers: "R2.1 baseline KD"}
+  - {id: B22, dataset: tin, model: alllocal_medium, seed: 42, answers: "R1.3 clustering mechanism (no cluster branch)"}
+  - {id: B23, dataset: tin, model: alllocal_macs_matched, seed: 42, answers: "all-local at matched MACs (removes the compute confound in B22)"}
+
+  # ---- The proposed model: all-local at matched MACs, given KD and multiple seeds -------
+  # B23 (seed 42, CE) showed all-local beats the hybrid at matched compute with 10% fewer
+  # parameters. These runs give that model the same KD and 3-seed treatment the hybrid got,
+  # so it can be reported as the study's resulting design rather than a single ablation point.
+  - {id: B24, dataset: tin, model: alllocal_macs_matched, seed: 43, answers: "proposed model, seed 43 (CE)"}
+  - {id: B25, dataset: tin, model: alllocal_macs_matched, seed: 44, answers: "proposed model, seed 44 (CE)"}
+  - {id: B26, dataset: tin, model: alllocal_macs_matched, seed: 42, kd_teacher: A2, answers: "proposed model + KD, seed 42 - HEADLINE NUMBER"}
+  - {id: B27, dataset: tin, model: alllocal_macs_matched, seed: 43, kd_teacher: A10, answers: "proposed model + KD, seed 43"}
+  - {id: B28, dataset: tin, model: alllocal_macs_matched, seed: 44, kd_teacher: A18, answers: "proposed model + KD, seed 44"}
+
+  # ---- Compute-matched CNN reference (the risk run) -------------------------------------
+  # ShuffleNetV2-x1.0 uses ~46M MACs against the proposed model's ~139M, so it is not a
+  # like-for-like compute comparison. x1.5 (~106M MACs, ~2.7M params) is the closest
+  # available CNN at this budget. If it matches the proposed model, the margin is compute
+  # rather than architecture and the framing must fall back to parameter efficiency.
+  - {id: B29, dataset: tin, model: shufflenet_v2_x1_5, seed: 42, answers: "compute-matched CNN reference (CE) - RISK RUN"}
+  - {id: B30, dataset: tin, model: shufflenet_v2_x1_5, seed: 42, kd_teacher: A2, answers: "compute-matched CNN reference (KD) - RISK RUN"}
+
+  # ---- Second dataset and local-operator choice -----------------------------------------
+  - {id: B31, dataset: cifar10, model: alllocal_macs_matched, seed: 42, answers: "proposed model on CIFAR-10 (CE)"}
+  - {id: B32, dataset: cifar10, model: alllocal_macs_matched, seed: 42, kd_teacher: B11, answers: "proposed model on CIFAR-10 (KD)"}
+  - {id: B33, dataset: tin, model: alllocal_conv3x3, seed: 42, answers: "stage-1 learned 3x3 vs LBPConv, on the all-local model"}
+
+  # ---- Decoupled KD probe: does a stronger KD method lift the proposed model? ----------
+  - {id: B34, dataset: tin, model: alllocal_dkd, seed: 42, kd_teacher: A2, answers: "DKD vs standard KD on the proposed model (decides the recipe framing)"}
+
+  # ---- Parameter-matched comparison against ShuffleNetV2-x1.5 (2.68M) ------------------
+  # All-local at 1.62M loses to x1.5 at 2.68M. These scale All-local to x1.5's parameter
+  # budget, which is the parameter-matched test that has never been run. Note the MACs gap
+  # widens (~230M vs 96.1M), so a win here is on parameters, not compute.
+  - {id: B35, dataset: tin, model: alllocal_2_68m, seed: 42, answers: "scaled All-local CE, param-matched to ShuffleNetV2-x1.5"}
+  - {id: B36, dataset: tin, model: alllocal_2_68m, seed: 42, kd_teacher: A2, answers: "scaled All-local KD - the headline attempt"}
+  - {id: B37, dataset: tin, model: alllocal_2_68m_dw7, seed: 42, answers: "scaled All-local with 7x7 depthwise, CE"}
+  - {id: B38, dataset: tin, model: alllocal_2_68m_dw7, seed: 42, kd_teacher: A2, answers: "scaled All-local with 7x7 depthwise, KD"}
+  - {id: B39, dataset: tin, model: shufflenet_v2_x1_5, seed: 43, answers: "x1.5 seed 43 - the scaling rate underpins the parameter claim"}
+  - {id: B40, dataset: tin, model: shufflenet_v2_x1_5, seed: 44, answers: "x1.5 seed 44"}
+
+  # ---- Learned 3x3 instead of LBPConv at stage 1 --------------------------------------
+  # B33 showed the two are statistically tied (57.41 vs 57.31, p = 0.63), but LBPConv expands
+  # stage 1 to 8C channels, making its activation tensor ~8x larger at batch 128 (240 MB vs
+  # 30 MB). If the tie holds across seeds, conv3x3 is the better final design: same accuracy,
+  # fewer parameters, far lower peak memory.
+  - {id: B41, dataset: tin, model: alllocal_conv3x3, seed: 43, answers: "conv3x3 stage 1, CE seed 43"}
+  - {id: B42, dataset: tin, model: alllocal_conv3x3, seed: 44, answers: "conv3x3 stage 1, CE seed 44"}
+  - {id: B43, dataset: tin, model: alllocal_conv3x3, seed: 42, kd_teacher: A2, answers: "conv3x3 stage 1, KD seed 42"}
+  - {id: B44, dataset: tin, model: alllocal_conv3x3, seed: 43, kd_teacher: A10, answers: "conv3x3 stage 1, KD seed 43"}
+  - {id: B45, dataset: tin, model: alllocal_conv3x3, seed: 44, kd_teacher: A18, answers: "conv3x3 stage 1, KD seed 44"}
+
+  # ---- Seeds for the headline comparison (TOP PRIORITY after Round 9) ------------------
+  # Round 9: scaled+7x7 + KD reached 61.55 val vs ShuffleNetV2-x1.5 + KD 59.71 at matched
+  # parameters (McNemar p = 2.6e-05), and beat the ResNet-18 teacher by 2.85 pp. But BOTH
+  # sides of that comparison are n=1. These bring the proposed model to 3 seeds and the
+  # baseline to 2-3. Nothing else matters more for the paper.
+  - {id: B46, dataset: tin, model: alllocal_2_68m_dw7, seed: 43, kd_teacher: A10, answers: "PROPOSED model KD seed 43"}
+  - {id: B47, dataset: tin, model: alllocal_2_68m_dw7, seed: 44, kd_teacher: A18, answers: "PROPOSED model KD seed 44"}
+  - {id: B48, dataset: tin, model: shufflenet_v2_x1_5, seed: 43, kd_teacher: A10, answers: "headline baseline KD seed 43"}
+  - {id: B49, dataset: tin, model: shufflenet_v2_x1_5, seed: 44, kd_teacher: A18, answers: "headline baseline KD seed 44"}
+  - {id: B50, dataset: tin, model: alllocal_2_68m_dw7, seed: 43, answers: "PROPOSED model CE seed 43"}
+  - {id: B51, dataset: tin, model: alllocal_2_68m_dw7, seed: 44, answers: "PROPOSED model CE seed 44"}
+
+  # ---- The design decision the M1-v2 cost data forces (run B52 BEFORE B53-B55) --------
+  # Measured on T4: at 1.62M the stage-1 learned 3x3 matched LBPConv in accuracy (57.41 vs
+  # 57.31 val, +0.19 test, McNemar p=0.63) while cutting peak batch-128 memory 2.51x
+  # (796.9 -> 316.9 MB), cutting graph latency b128 1.37x and raising throughput 1.43x, at
+  # equal parameters (1,619,810 vs 1,621,490) and equal MACs. If that tie survives at 2.7M,
+  # conv3x3 strictly dominates LBPConv and must become the proposed model: publishing the
+  # LBPConv variant while our own ablation shows a cheaper equal-accuracy alternative is the
+  # single most obvious reviewer objection available.
+  # B52 is a GATE: if its val is within 0.3 pp of B38 (61.55), switch the headline to conv3x3
+  # and run B53-B55. If it drops more than 0.5 pp, keep B38 and report conv3x3 as the
+  # memory-efficient variant with the accuracy cost stated.
+  - {id: B52, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 42, kd_teacher: A2, answers: "GATE: does the conv3x3/LBPConv tie survive at 2.7M?"}
+  - {id: B53, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 43, kd_teacher: A10, answers: "conv3x3 KD seed 43 (B52 gate PASSED; done in R11: 60.75)"}
+  - {id: B54, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 44, kd_teacher: A18, answers: "conv3x3 KD seed 44 - DECIDES the stage-1 operator"}
+  - {id: B55, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 42, answers: "conv3x3 CE seed 42 (conv3x3 has NO TIN CE run at all)"}
+
+  # ---- CIFAR-10 for the headline pair (closes a selective-reporting gap) --------------
+  # The master table covers nine models on CIFAR-10 but NONE of ShuffleNetV2-x1.5, the
+  # scaled models, or conv3x3. Publishing a CIFAR-10 table that omits the proposed model is
+  # the same objection R2 raised about favourable comparisons, so either these run or the
+  # CIFAR-10 table comes out of the paper.
+  # NOTE: CIFAR-10 is saturated here (ResNet-18 = 96.76, above every student we have), so
+  # this will NOT reproduce the beat-the-teacher result. The claim it supports is the
+  # parameter-matched one: proposed vs ShuffleNetV2-x1.5 at ~2.68M. Frame it that way.
+  # Teacher is B11 (cifar10_resnet18_ce_s42), trained on account B.
+  # B56/B57 are needed whichever architecture wins B52. B60/B61 apply only if B52 passes,
+  # so run B58/B59 vs B60/B61 AFTER B52 reports - not both.
+  - {id: B56, dataset: cifar10, model: shufflenet_v2_x1_5, seed: 42, answers: "headline baseline on CIFAR-10 (CE)"}
+  - {id: B57, dataset: cifar10, model: shufflenet_v2_x1_5, seed: 42, kd_teacher: B11, answers: "headline baseline on CIFAR-10 (KD)"}
+  - {id: B58, dataset: cifar10, model: alllocal_2_68m_dw7, seed: 42, answers: "LBPConv variant on CIFAR-10 (CE) - needed if B54 keeps LBPConv as the headline"}
+  - {id: B59, dataset: cifar10, model: alllocal_2_68m_dw7, seed: 42, kd_teacher: B11, answers: "LBPConv variant on CIFAR-10 (KD) - needed if B54 keeps LBPConv as the headline"}
+  - {id: B60, dataset: cifar10, model: alllocal_2_68m_conv3x3_dw7, seed: 42, conditional: true, answers: "proposed (conv3x3) on CIFAR-10 (CE) - only if B52 PASSES"}
+  - {id: B61, dataset: cifar10, model: alllocal_2_68m_conv3x3_dw7, seed: 42, kd_teacher: B11, conditional: true, answers: "proposed (conv3x3) on CIFAR-10 (KD) - only if B52 PASSES"}
+
+  # ---- Round 12: finish the proposed model -------------------------------------------
+  # After Round 11 the picture changed. On Tiny-ImageNet with BOTH sides at n=3, the
+  # LBPConv variant is 61.23 +-0.28 vs ShuffleNetV2-x1.5 + KD 59.72 +-0.14 (+1.51 pp,
+  # Welch p=0.0041, and McNemar significant on all three seeds independently).
+  # conv3x3 is at 61.11 +-0.50 on n=2 and is now trailing LBPConv on BOTH measured seeds
+  # (-0.09 on s42, -0.36 on s43). It is no longer the strict domination the 1.62M pair
+  # suggested: it costs ~0.2 pp for a 2.5x cut in batch-128 activation memory. B54 decides
+  # whether that holds at n=3.
+  # conv3x3 has NO Tiny-ImageNet CE run at all (n=0), and R2.1 demanded CE on all datasets,
+  # so B55/B62/B63 are required if conv3x3 is the proposed model.
+  - {id: B62, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 43, answers: "conv3x3 CE seed 43"}
+  - {id: B63, dataset: tin, model: alllocal_2_68m_conv3x3_dw7, seed: 44, answers: "conv3x3 CE seed 44"}
+
+  # CIFAR-10 is now a SUPPORTING result, not a neutral one: at matched parameters the
+  # proposed model beats ShuffleNetV2-x1.5 by +0.82 val / +0.48 test with KD (McNemar
+  # p=0.0087) and +0.64 / +0.51 with CE (p=0.0138), and ties the ResNet-18 teacher
+  # (-0.08 val, +0.15 test, p=0.432) at 4.25x fewer parameters. Every CIFAR-10 row is
+  # still n=1, so these seeds are worth more than they were before Round 11.
+  # A KD student must use the ResNet-18 teacher of its OWN dataset AND seed (validated in
+  # run_queue.validate_plan). B11 is the CIFAR-10 teacher for seed 42 only, so CIFAR-10 at
+  # seeds 43/44 needs its own teachers first.
+  - {id: B68, dataset: cifar10, model: resnet18, seed: 43, conditional: true, answers: "CIFAR-10 teacher seed 43 (required by B64/B66)"}
+  - {id: B69, dataset: cifar10, model: resnet18, seed: 44, conditional: true, answers: "CIFAR-10 teacher seed 44 (required by B65/B67)"}
+  - {id: B64, dataset: cifar10, model: shufflenet_v2_x1_5, seed: 43, kd_teacher: B68, conditional: true, answers: "CIFAR-10 baseline KD seed 43"}
+  - {id: B65, dataset: cifar10, model: shufflenet_v2_x1_5, seed: 44, kd_teacher: B69, conditional: true, answers: "CIFAR-10 baseline KD seed 44"}
+  - {id: B66, dataset: cifar10, model: alllocal_2_68m_conv3x3_dw7, seed: 43, kd_teacher: B68, conditional: true, answers: "CIFAR-10 proposed KD seed 43"}
+  - {id: B67, dataset: cifar10, model: alllocal_2_68m_conv3x3_dw7, seed: 44, kd_teacher: B69, conditional: true, answers: "CIFAR-10 proposed KD seed 44"}
+
+  # ---- Conditional (T8): extra seeds ONLY for ablations within 1.0 pp (val) of B1 --------
+  - {id: C1, dataset: tin, model: medium_s1_dwconv, seed: 43, conditional: true, answers: "T8"}
+  - {id: C2, dataset: tin, model: medium_s1_dwconv, seed: 44, conditional: true, answers: "T8"}
+  - {id: C3, dataset: tin, model: medium_s1_conv3x3, seed: 43, conditional: true, answers: "T8"}
+  - {id: C4, dataset: tin, model: medium_s1_conv3x3, seed: 44, conditional: true, answers: "T8"}
+  - {id: C5, dataset: tin, model: medium_noshuffle, seed: 43, conditional: true, answers: "T8"}
+  - {id: C6, dataset: tin, model: medium_noshuffle, seed: 44, conditional: true, answers: "T8"}
+  - {id: C7, dataset: tin, model: medium_nofold, seed: 43, conditional: true, answers: "T8"}
+  - {id: C8, dataset: tin, model: medium_nofold, seed: 44, conditional: true, answers: "T8"}
+  - {id: C9, dataset: tin, model: medium_s4_p2, seed: 43, conditional: true, answers: "T8"}
+  - {id: C10, dataset: tin, model: medium_s4_p2, seed: 44, conditional: true, answers: "T8"}
+  - {id: C11, dataset: tin, model: medium_r4, seed: 43, conditional: true, answers: "T8"}
+  - {id: C12, dataset: tin, model: medium_r4, seed: 44, conditional: true, answers: "T8"}
+  - {id: C13, dataset: tin, model: medium_r1, seed: 43, conditional: true, answers: "T8"}
+  - {id: C14, dataset: tin, model: medium_r1, seed: 44, conditional: true, answers: "T8"}
+  - {id: C15, dataset: tin, model: medium_stem2, seed: 43, conditional: true, answers: "T8"}
+  - {id: C16, dataset: tin, model: medium_stem2, seed: 44, conditional: true, answers: "T8"}
+  - {id: C17, dataset: tin, model: alllocal_medium, seed: 43, conditional: true, answers: "T8"}
+  - {id: C18, dataset: tin, model: alllocal_medium, seed: 44, conditional: true, answers: "T8"}
