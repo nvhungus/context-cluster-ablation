@@ -109,7 +109,7 @@ figures are hard-coded from the benchmark session reported in `results/`.
 
 ## What is in `release/runs/`
 
-One directory per training run, 81 in total, named
+One directory per training run, 91 in total, named
 `{dataset}_{model}_{ce|kd}_s{seed}`. Every run here ran its full epoch budget
 (100 on Tiny-ImageNet, 250 on CIFAR-10); single-epoch smoke-test runs are not
 included. Each directory contains:
