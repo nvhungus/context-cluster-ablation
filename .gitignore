@@ -15,8 +15,10 @@ venv/
 # ---- Datasets and training output ---------------------------------------
 # Datasets are downloaded at run time; runs/ is written by tools/train.py.
 data/
-runs/
-runs_*/
+# Root-anchored: a bare "runs/" also matches release/runs/, which is the
+# per-run record set the paper points at and must be published.
+/runs/
+/runs_*/
 checkpoints/
 artifacts/
 external/

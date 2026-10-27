@@ -1,0 +1,9 @@
+{
+  "phase": "test",
+  "epoch": 244,
+  "checkpoint": "best.pth",
+  "test_loss": 0.3005018524169922,
+  "test_acc1": 94.62,
+  "test_time_s": 2.6966746690004584,
+  "test_acc5": 99.8
+}
