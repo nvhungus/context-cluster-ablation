@@ -54,6 +54,11 @@ Every reported run is declared in [`configs/run_plan.yaml`](configs/run_plan.yam
 which is the single source of truth for the experiments: run ID, dataset, model
 config, seed, teacher, and the estimated T4 hours used for scheduling.
 
+[`docs/protocol.md`](docs/protocol.md) states the protocol every run follows:
+the exact train/validation/test splits, the full training recipe, the seed
+policy, how the checkpoint is selected, and how accuracy, parameters,
+operation counts, latency and memory are each measured and reported.
+
 ```bash
 # List every run with its experiment name and estimated cost
 python tools/run_queue.py --list

@@ -45,7 +45,8 @@ results/benchmark*/
 # release and are not ours to redistribute.
 manuscript/
 Report_LaTeX/
-docs/
+docs/*
+!docs/protocol.md
 *.pdf
 *.cls
 *.docx
