@@ -1,0 +1,109 @@
+{
+  "model_name": "hbcc",
+  "config_id": "alllocal_2_68m",
+  "image_size": 32,
+  "device": "cuda",
+  "device_name": "Tesla T4",
+  "cpu_name": "Intel(R) Xeon(R) CPU @ 2.00GHz",
+  "torch_version": "2.11.0+cu128",
+  "cuda_version": "12.8",
+  "cudnn_version": 91900,
+  "cudnn_benchmark": false,
+  "precision": "fp32",
+  "params_total": 2672596,
+  "params_trainable": 2666980,
+  "model_size_mb": 10.237022399902344,
+  "macs": 229554128,
+  "flops": 229554128,
+  "unsupported_ops": {
+    "aten::linspace": 2,
+    "aten::sub": 2,
+    "aten::meshgrid": 1,
+    "aten::gelu": 19,
+    "aten::mul": 10,
+    "aten::add": 10,
+    "aten::mean": 1
+  },
+  "flop_error": null,
+  "cluster_similarity_macs": 0,
+  "cluster_extra_macs": 0,
+  "macs_incl_cluster": 229554128,
+  "bops": 0,
+  "weights_memory_mb": 19.3984375,
+  "latency_ms_b1": 3.5035804500000722,
+  "latency_ms_b1_repeats": [
+    3.5035804500000722,
+    3.4435516599990024,
+    3.5229508199995507
+  ],
+  "peak_memory_mb_b1": 28.24658203125,
+  "activation_memory_mb_b1": 8.84814453125,
+  "throughput_b1": 299.506867035128,
+  "latency_ms_b16": 6.115685089999943,
+  "latency_ms_b16_repeats": [
+    6.111101529999132,
+    6.115685089999943,
+    6.148860460000378
+  ],
+  "peak_memory_mb_b16": 149.3359375,
+  "activation_memory_mb_b16": 129.9375,
+  "throughput_b16": 2663.241170363283,
+  "latency_ms_b64": 23.358686560000024,
+  "latency_ms_b64_repeats": [
+    23.312850880000724,
+    23.358686560000024,
+    23.43667941000035
+  ],
+  "peak_memory_mb_b64": 528.1484375,
+  "activation_memory_mb_b64": 508.75,
+  "throughput_b64": 2754.324552391561,
+  "latency_ms_b128": 46.23079060000009,
+  "latency_ms_b128_repeats": [
+    46.14170144000013,
+    46.23079060000009,
+    46.35300456999971
+  ],
+  "peak_memory_mb_b128": 1036.8984375,
+  "activation_memory_mb_b128": 1017.5,
+  "throughput_b128": 2773.3341748091048,
+  "latency_graph_ms_b1": 0.8997820000001866,
+  "latency_graph_ms_b1_repeats": [
+    0.8997820000001866,
+    0.8906238100007613,
+    0.8854358000007778,
+    0.8999543099992025,
+    0.9025151599996661
+  ],
+  "graph_max_abs_diff_b1": 0.0,
+  "graph_matches_eager_b1": true,
+  "latency_graph_ms_b16": 6.135837179999726,
+  "latency_graph_ms_b16_repeats": [
+    6.132839509999712,
+    6.148009099999854,
+    6.127781310000273,
+    6.1360242499995366,
+    6.135837179999726
+  ],
+  "graph_max_abs_diff_b16": 0.0,
+  "graph_matches_eager_b16": true,
+  "latency_graph_ms_b64": 23.37812382999914,
+  "latency_graph_ms_b64_repeats": [
+    23.432045870000593,
+    23.410493269999506,
+    23.37812382999914,
+    23.271019109999997,
+    23.288067299999966
+  ],
+  "graph_max_abs_diff_b64": 0.0,
+  "graph_matches_eager_b64": true,
+  "latency_graph_ms_b128": 45.74131685999987,
+  "latency_graph_ms_b128_repeats": [
+    45.7293344499999,
+    45.74131685999987,
+    45.75643496999987,
+    45.703304170000365,
+    45.80370731999892
+  ],
+  "graph_max_abs_diff_b128": 0.0,
+  "graph_matches_eager_b128": true
+}

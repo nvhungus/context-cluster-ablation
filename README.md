@@ -109,8 +109,25 @@ python paper/figures/fig1_architecture.py   # architecture diagram
 python paper/figures/fig2_pareto.py         # accuracy vs parameters and MACs
 ```
 
-Both write a PDF next to the script. They need only `matplotlib`; the cost
-figures are hard-coded from the benchmark session reported in `results/`.
+Both write a PDF next to the script. They need only `matplotlib`. The cost
+figures they plot are hard-coded from
+[`results/cost_t4_m1v3/summary.csv`](results/cost_t4_m1v3/summary.csv), which
+is the single profiling session the reported memory and latency come from.
+
+## What is in `results/`
+
+`results/cost_t4_m1v3/` is the profiling session that every memory, latency and
+throughput figure in the study is taken from: one `summary.csv` with 59 columns
+per model, plus the raw per-model JSON. It includes the `graph_matches_eager_b*`
+columns, which record that each CUDA-Graph capture reproduced its eager output
+bitwise (`graph_max_abs_diff_b* = 0.0`), and the `*_repeats` columns holding
+every timed loop behind each reported median.
+
+The remaining CSVs in `results/` predate the current study: they profile an
+earlier generation of configurations at different parameter counts, were taken
+with a different torch build, and have no graph-capture columns. They are kept
+because `notebooks/kaggle_smoke_test.ipynb` self-checks against them. **Do not
+read the study's cost figures out of them** -- use `cost_t4_m1v3/`.
 
 ## What is in `release/runs/`
 
@@ -206,7 +223,8 @@ configs/              model configs; run_plan.yaml declares every reported run
 tools/                train.py, run_queue.py, benchmark.py, aggregate_seeds.py
 tests/                unit tests for losses, profiler, run queue, models
 notebooks/            the Kaggle session notebooks used to execute the runs
-results/              aggregated CSV tables
+results/              cost_t4_m1v3/ is the profiling session behind the reported
+                      cost figures; the other CSVs are from an earlier generation
 release/runs/         per-run metrics, provenance and per-image predictions
 paper/figures/        figure-generation scripts
 ```
