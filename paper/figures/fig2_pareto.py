@@ -20,7 +20,7 @@ from matplotlib.ticker import NullFormatter
 
 _HERE = Path(__file__).resolve().parent
 # Write straight into the Overleaf upload folder so the PDFs have one home.
-OUT = _HERE  # write the PDFs next to this script
+OUT = _HERE.parents[1] / 'submission'
 OUT.mkdir(parents=True, exist_ok=True)
 
 plt.rcParams.update({
@@ -40,12 +40,12 @@ plt.rcParams.update({
 # name, params (M), MACs (M), top-1 (%), is_ours, is_teacher,
 # label offset for panel (a) and for panel (b), in points
 MODELS = [
-    ("MobileNetV2",         2.48,  25.8, 52.32, False, False, (7, -4),   (7, -4)),
-    ("ShuffleNetV2-x1.0",   1.46,  46.3, 57.36, False, False, (4, -11),  (7, -10)),
-    ("ShuffleNetV2-x1.5",   2.68,  96.1, 59.72, False, False, (8, -3),   (8, -3)),
-    ("HBCC-Medium",         1.80, 138.9, 58.19, False, False, (-10, 8),  (-6, 8)),
-    ("ResNet-18 (teacher)", 11.27, 556.8, 58.76, False, True, (-30, -12), (-30, -12)),
-    ("All-Local (ours)",    2.71, 231.3, 61.21, True,  False, (-12, 9),  (-14, 9)),
+    ("MobileNetV2",         2.48,  25.8, 53.16, False, False, (7, -4),   (7, -4)),
+    ("ShuffleNetV2-x1.0",   1.46,  46.3, 57.74, False, False, (4, -11),  (7, -10)),
+    ("ShuffleNetV2-x1.5",   2.68,  96.1, 59.79, False, False, (8, -3),   (8, -3)),
+    ("HBCC-Medium",         1.80, 138.9, 58.63, False, False, (-10, 8),  (-6, 8)),
+    ("ResNet-18 (teacher)", 11.27, 556.8, 58.71, False, True, (-30, -12), (-30, -12)),
+    ("All-Local (ours)",    2.71, 231.3, 61.30, True,  False, (-12, 9),  (-14, 9)),
 ]
 
 C_BASE = "#4C72B0"
