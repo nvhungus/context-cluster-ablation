@@ -11,21 +11,26 @@ contains experiments that test whether the mechanism survives compression to
 one to three million parameters at 32×32 input.
 
 It does not. Holding the stem, fold partitioning, block depth and width fixed and
-removing the *local* convolutional branch costs 0.74 pp on Tiny-ImageNet;
-removing the *clustering* branch instead gains 1.03 pp at 10% fewer parameters.
+removing the *local* convolutional branch costs 0.39 pp on Tiny-ImageNet;
+removing the *clustering* branch instead gains 0.94 pp at 10% fewer parameters.
 The design choices built around clustering — fold partitioning, channel shuffle,
 tuned occupancy — move accuracy by less than seed variance.
 
 Following the ablations to their conclusion gives a clustering-free model,
 **All-Local (2.7M)**: a stride-1 stem, a learned 3×3 convolution at stage 1, and
 7×7 depthwise plus 1×1 pointwise convolutions at stages 2–4. With logit
-distillation it reaches **61.21 ± 0.40** top-1 on Tiny-ImageNet against
-**59.72 ± 0.14** for a parameter-matched ShuffleNetV2-x1.5 trained identically
-from the same teacher, and **58.76 ± 0.06** for the ResNet-18 teacher itself.
+distillation it reaches **61.30 ± 0.39** top-1 on Tiny-ImageNet against
+**59.79 ± 0.38** for a parameter-matched ShuffleNetV2-x1.5 trained identically
+from the same teacher, and **58.71 ± 0.17** for the ResNet-18 teacher itself.
 
-Two caveats belong with that number: the margin holds **under distillation**
-(with plain cross-entropy it falls to 0.47 pp and is not significant), and it
-costs 2.41× the operations of the parameter-matched baseline.
+Two caveats belong with that number: the margin is largest **under
+distillation** (with plain cross-entropy it is +0.90 pp, still significant at
+p = 0.030, and the comparison against the teacher becomes a tie), and it costs
+2.41× the operations of the parameter-matched baseline.
+
+All accuracies quoted here and in the tables are **test-set**, recomputed from
+the per-image predictions in `release/runs/`. Validation-set values appear in
+earlier commits of this README and are superseded.
 
 ## Environment
 
