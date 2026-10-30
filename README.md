@@ -123,13 +123,42 @@ included. Each directory contains:
 |---|---|
 | `metrics.jsonl` | one JSON object per epoch: train loss, validation accuracy, learning rate, wall time |
 | `run_info.json` | provenance — git commit, seed, resolved teacher checkpoint, torch/CUDA/cuDNN versions, GPU and CPU model, start and end time, best epoch |
-| `test_metrics.json` | final test accuracy as recorded by the training script |
+| `test_metrics.json` | final test accuracy as recorded by the training script (see the caveat below) |
 | `test_predictions.npy` | predicted class index for every test image, in dataset order |
 | `test_targets.npy` | ground-truth class index for every test image |
 
 Per-image predictions are included so that any comparison reported here can be
 recomputed, including the paired tests, which need the pairing that aggregate
 accuracies discard.
+
+**Use the `.npy` files, not `test_metrics.json`.** In 30 of the 91 runs the two
+disagree by one to four images out of 10,000 (0.01–0.04 pp). The training
+script's logged top-1 comes from `output.topk(5)` while the saved predictions
+come from `output.argmax`, and the two resolve exact logit ties differently
+under mixed precision. Every accuracy quoted in this repository is recomputed
+from the `.npy` files, which are authoritative. Validation accuracy in
+`metrics.jsonl` comes from the same `topk` path, so checkpoint selection
+carries the same ≤0.04 pp imprecision — far below the ~0.5 pp epoch-to-epoch
+validation variation, so the selected checkpoint is unaffected in practice.
+
+**Provenance, and its limits.** Each run's `run_info.json` records the git
+commit of the working repository the run was launched from. That repository's
+history is not published here, so these hashes cannot be resolved against the
+code in this snapshot; they are retained because they distinguish runs
+launched from different code states, and fourteen distinct commits appear
+across the released runs. What this snapshot does let you verify is the
+configuration of every run (`configs/run_plan.yaml` plus the referenced config
+files), the resolved teacher checkpoint path, the full software and hardware
+environment, the per-epoch metrics, and the per-image test predictions from
+which every reported number is recomputed. What it does not let you do is
+confirm that the released code is byte-identical to the code that produced a
+given run.
+
+**Teacher checkpoints are not included.** Reproducing a distilled student
+therefore requires retraining its ResNet-18 teacher from the config and seed
+recorded in `run_info.json`. Training runs with `deterministic: false`, so
+cuDNN is non-deterministic and a retrained teacher will not be bit-identical;
+the seed-to-seed variance reported in the study includes this source.
 
 Recompute a reported accuracy:
 
