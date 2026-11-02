@@ -1,0 +1,64 @@
+# The proposed All-Local model with the coordinate channels removed.
+#
+# Every HBCC-family config in this study sets use_coord: true, which concatenates each pixel's
+# normalised xy in [-0.5, 0.5] to the image, so the stem convolution sees five input channels.
+# The torchvision baselines see three. The headline comparison therefore confounds the
+# coordinate channels with the architecture, and nothing in the study separates them: no
+# coord-off run exists among the 91 released runs.
+#
+# This config is that run. It is byte-identical to hbcc_alllocal_2_68m_conv3x3_dw7.yaml except
+# for use_coord and the experiment name. Parameters: 2,707,416 - 1,404 = 2,706,012, since the
+# stem conv drops from 5x78x3x3 = 3,510 to 3x78x3x3 = 2,106 weights. That is a 0.05% change,
+# so the parameter match against ShuffleNetV2-x1.5 (2.68M) is preserved.
+experiment:
+  name: hbcc_alllocal_2_68m_conv3x3_dw7_coordoff
+data:
+  name: cifar10
+  root: data
+  download: true
+  batch_size: 128
+  val_batch_size: 256
+  test_batch_size: 256
+  val_size: 5000
+  split_seed: 42
+  workers: 2
+  augment: true
+  randaugment:
+    enabled: true
+    num_ops: 2
+    magnitude: 9
+  random_erasing:
+    p: 0.25
+    scale: [0.02, 0.2]
+    ratio: [0.3, 3.3]
+model:
+  name: hbcc
+  num_classes: 10
+  use_coord: false
+  embed_dims: [78, 116, 232, 310]
+  depths: [1, 1, 2, 1]
+  mlp_ratios: 3.0
+  heads: [2, 3, 4, 4]
+  head_dim: [16, 16, 16, 16]
+  proposals: [[2, 2], [2, 2], [2, 2], [1, 1]]
+  folds: [[4, 4], [2, 2], [1, 1], [1, 1]]
+  similarities: [cosine, cosine, cosine, cosine]
+  stage_modes: [local, local, local, local]
+  local_branches: [conv3x3, dwconv7, dwconv7, dwconv7]
+  local_ratios: [1.0, 1.0, 1.0, 1.0]
+  channel_shuffle: [false, false, false, false]
+  norm: bn
+  stem_stride: 1
+  drop_path_rate: 0.08
+train:
+  epochs: 300
+  warmup_epochs: 5
+  lr: 0.001
+  weight_decay: 0.05
+  label_smoothing: 0.1
+  mixup_alpha: 0.2
+  cutmix_alpha: 1.0
+  cutmix_prob: 0.5
+  amp: true
+  kd_alpha: 0.0
+  kd_temperature: 4.0

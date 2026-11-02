@@ -1,0 +1,51 @@
+# ShuffleNetV2-x1.5 given the same two coordinate channels the HBCC family receives.
+#
+# Only used if the E-series result puts CoordConv at worse than -0.6 pp, i.e. if the
+# coordinate channels account for a material share of the headline margin. In that case the
+# comparison in Table I is confounded, and the cheaper repair is to give the baseline the
+# same input (3 runs) rather than to strip ours and re-run the headline on both datasets
+# (12 runs).
+#
+# Byte-identical to shufflenet_v2_x1_5_cifar.yaml except for the experiment name and
+# model.use_coord. The flag requires the code path added alongside this file:
+# lightweight_hbcc/models/baselines.py widens conv1 from three input channels to five and
+# wraps the model in CoordInput. Without that code the key would be silently swallowed by
+# the builder's **_ and the run would quietly train a three-channel model.
+#
+# Parameters, 200-class head: 2,683,624 + 432 = 2,684,056 (conv1 goes from 3x24x3x3 to
+# 5x24x3x3), against the proposed model's 2,707,416. The match holds to 0.87%.
+experiment:
+  name: shufflenet_v2_x1_5_coord_cifar
+data:
+  name: cifar10
+  root: data
+  download: true
+  batch_size: 128
+  val_batch_size: 256
+  test_batch_size: 256
+  val_size: 5000
+  split_seed: 42
+  workers: 2
+  augment: true
+  randaugment:
+    enabled: true
+    num_ops: 2
+    magnitude: 9
+  random_erasing:
+    p: 0.25
+    scale: [0.02, 0.2]
+    ratio: [0.3, 3.3]
+model:
+  name: shufflenet_v2_x1_5_cifar
+  num_classes: 10
+  use_coord: true
+train:
+  epochs: 300
+  warmup_epochs: 5
+  lr: 0.001
+  weight_decay: 0.05
+  label_smoothing: 0.1
+  mixup_alpha: 0.2
+  cutmix_alpha: 1.0
+  cutmix_prob: 0.5
+  amp: true

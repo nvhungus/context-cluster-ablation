@@ -1,0 +1,3 @@
+experiment,best_val_acc1,best_val_acc5,test_acc1,test_acc5
+hbcc_accuracy_medium_kd_tin,57.95,81.39,58.9,81.41
+hbcc_accuracy_small_kd_tin,57.03,80.53,57.56,80.76
